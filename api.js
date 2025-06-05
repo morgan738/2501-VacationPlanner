@@ -40,9 +40,10 @@ app.post('/vacations', async(req,res,next) => {
     }
 })
 
-app.delete('/vacations/:id', async (req,res,next) => {
+app.delete('/vacations/:id/user/:user_id', async (req,res,next) => {
     try {
-        await deleteVaycay(req.params.id)
+        console.log(req.params)
+        await deleteVaycay(req.params.id, req.params.user_id)
         res.sendStatus(204)
     } catch (error) {
         next(error)

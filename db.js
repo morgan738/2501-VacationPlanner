@@ -25,11 +25,11 @@ const createPlaces = async (place) => {
 
 const createVaycay = async (vaycay) => {
     const SQL = `
-        INSERT INTO vacations(id, user_id, place_id)
-        VALUES ($1, $2, $3)
+        INSERT INTO vacations(id, user_id, place_id, start_date, end_date, party_count)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING *
     `
-    const response = await client.query(SQL, [uuidv4(), vaycay.user_id, vaycay.place_id])
+    const response = await client.query(SQL, [uuidv4(), vaycay.user_id, vaycay.place_id, vaycay.start_date, vaycay.end_date, vaycay.party_count])
     return response.rows[0]
 }
 
@@ -58,12 +58,12 @@ const fetchVaycay = async () => {
     return response.rows
 }
 
-const deleteVaycay = async (id) => {
+const deleteVaycay = async (id, user_id) => {
     const SQL = `
         DELETE FROM vacations
-        WHERE id = $1
+        WHERE id = $1 AND user_id = $2
     `
-    await client.query(SQL, [id])
+    await client.query(SQL, [id, user_id])
 }
 
 const seed = async () => {
@@ -84,7 +84,10 @@ const seed = async () => {
             id UUID PRIMARY KEY,
             user_id UUID REFERENCES users(id) NOT NULL,
             place_id UUID REFERENCES places(id) NOT NULL,
-            created_at TIMESTAMP DEFAULT now()
+            created_at TIMESTAMP DEFAULT now(),
+            start_date TIMESTAMP DEFAULT now() NOT NULL,
+            end_date TIMESTAMP NOT NULL,
+            party_count INTEGER DEFAULT 1
         );
     `
     await client.query(SQL)
@@ -108,7 +111,7 @@ const seed = async () => {
     ])
 
     await Promise.all([
-        createVaycay({user_id: joe.id, place_id: argentina.id})
+        createVaycay({user_id: joe.id, place_id: argentina.id, start_date: new Date(2025, 9, 15), end_date: new Date(2025, 9, 22), party_count: 3})
     ])
     
     console.log('created tables and seeded data')
